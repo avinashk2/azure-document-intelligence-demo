@@ -66,13 +66,19 @@ class DocumentProcessor:
                 key_confidence = 0
                 value_confidence = 0
 
-                # Safely extract key confidence
+                # Try to get confidence from the key
                 if hasattr(kv_pair.key, 'confidence') and kv_pair.key.confidence is not None:
                     key_confidence = round(kv_pair.key.confidence, 3)
+                # If not available, try from bounding regions/content
+                elif hasattr(kv_pair, 'confidence') and kv_pair.confidence is not None:
+                    key_confidence = round(kv_pair.confidence, 3)
 
-                # Safely extract value confidence
+                # Try to get confidence from the value
                 if hasattr(kv_pair.value, 'confidence') and kv_pair.value.confidence is not None:
                     value_confidence = round(kv_pair.value.confidence, 3)
+                # If not available, try from bounding regions/content
+                elif hasattr(kv_pair, 'confidence') and kv_pair.confidence is not None:
+                    value_confidence = round(kv_pair.confidence, 3)
 
                 key_value_pairs.append({
                     "key": kv_pair.key.content,
