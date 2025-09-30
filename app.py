@@ -137,17 +137,13 @@ def display_key_value_pairs(kv_pairs):
 
     # Convert to DataFrame for better display
     df = pd.DataFrame(kv_pairs)
-    df["Key Confidence"] = df["key_confidence"].apply(lambda x: f"{x:.1%}")
-    df["Value Confidence"] = df["value_confidence"].apply(lambda x: f"{x:.1%}")
 
-    # Display with styling
+    # Display without confidence columns
     st.dataframe(
-        df[["key", "value", "Key Confidence", "Value Confidence"]],
+        df[["key", "value"]],
         column_config={
             "key": "Key",
-            "value": "Value",
-            "Key Confidence": st.column_config.TextColumn("Key Confidence"),
-            "Value Confidence": st.column_config.TextColumn("Value Confidence")
+            "value": "Value"
         },
         use_container_width=True
     )
@@ -209,11 +205,12 @@ def display_text_content(text_data):
 
 def display_confidence_details(confidence_summary):
     """Display detailed confidence statistics"""
-    if not confidence_summary:
-        st.info("No confidence data available.")
+    if not confidence_summary or confidence_summary.get('count', 0) == 0:
+        st.info("Confidence scores are not available for the prebuilt-document model. Text OCR confidence is calculated where available.")
         return
 
-    st.write("**Confidence Statistics:**")
+    st.write("**Text OCR Confidence Statistics:**")
+    st.caption("These scores reflect the OCR engine's confidence in reading the text")
 
     col1, col2 = st.columns(2)
 
@@ -223,16 +220,16 @@ def display_confidence_details(confidence_summary):
 
     with col2:
         st.metric("Maximum Confidence", f"{confidence_summary.get('maximum', 0):.1%}")
-        st.metric("Total Elements", confidence_summary.get('count', 0))
+        st.metric("Text Elements Analyzed", confidence_summary.get('count', 0))
 
     # Confidence level breakdown
     avg_conf = confidence_summary.get('average', 0)
     if avg_conf >= 0.9:
-        st.success("🟢 Excellent confidence level")
+        st.success("🟢 Excellent OCR confidence - text is clearly readable")
     elif avg_conf >= 0.7:
-        st.warning("🟡 Good confidence level")
+        st.warning("🟡 Good OCR confidence - most text is readable")
     else:
-        st.error("🔴 Low confidence level - manual review recommended")
+        st.error("🔴 Low OCR confidence - document may be blurry or low quality")
 
 
 def create_download_section():
